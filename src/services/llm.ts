@@ -20,16 +20,24 @@ export class LLMService {
     Provide a progressive hint based on their current code and the problem description. 
     If their code is empty, suggest an algorithmic approach. 
     If they have code, identify a logical flaw or suggest the next step. 
-    Keep it brief and encouraging. Never provide the full code solution unless explicitly asked after multiple hints.`;
+    Keep it brief and encouraging. Never provide the full code solution unless explicitly asked after multiple hints.
+    
+    IMPORTANT: End your response with exactly 2-3 brief follow-up questions that the user might want to ask next to deepen their understanding. 
+    Format them as a markdown list after a header "### Suggestions". 
+    Example:
+    ### Suggestions
+    - What is the time complexity of this approach?
+    - Can you explain how the recursion works here?`;
 
     const userPrompt = `Problem: ${problemData.title}\nDescription: ${problemData.description}\nLanguage: ${problemData.language}\nMy current code:\n\`\`\`${problemData.language}\n${problemData.code}\n\`\`\``;
 
     console.log(`[LLMService] Requesting hint from ${provider} (${model})`);
 
     // Prepare a unified history that works for everyone
+    // We alternate: [User Context] -> Assistant Hint -> [User Feedback] -> Assistant Hint
     const messages: any[] = [];
     
-    // Add developer/system instruction first for OpenAI-ish
+    // 1. Add developer/system instruction first for OpenAI-ish
     if (provider === 'openai' || provider === 'deepseek' || provider === 'openrouter' || provider === 'together' || provider === 'ollama') {
       messages.push({ 
         role: (provider === 'openai' && (model.startsWith('o1') || model.startsWith('o3'))) ? "developer" : "system", 
@@ -37,19 +45,19 @@ export class LLMService {
       });
     }
 
-    // Add previous conversation history
+    // 2. Add history (History items are only Assistant hints currently)
     history.forEach((h, i) => {
       if (h.content.trim()) {
-        if (i === 0) {
-          messages.push({ role: "user", content: "I'm working on a LeetCode problem." });
-        } else {
-          messages.push({ role: "user", content: "I'm still stuck, can you give me another nudge?" });
-        }
+        // Interleave user feedback to keep turns alternating
+        messages.push({ 
+          role: "user", 
+          content: i === 0 ? "I'm working on a LeetCode problem. Help me." : "I'm still stuck on this, give me another nudge." 
+        });
         messages.push({ role: h.role, content: h.content });
       }
     });
 
-    // Add the CURRENT context as the final user message
+    // 3. Add the CURRENT context as the final user message
     messages.push({ role: "user", content: userPrompt });
 
     if (provider === 'openai' || provider === 'deepseek' || provider === 'openrouter' || provider === 'together' || provider === 'ollama') {

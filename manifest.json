@@ -22,18 +22,13 @@
     "128": "icon.png"
   },
   "action": {
-    "default_title": "Open Hint Panel",
-    "default_popup": "index.html",
+    "default_title": "Toggle LeetCode Hinter",
     "default_icon": {
       "16": "icon.png",
       "32": "icon.png",
       "48": "icon.png",
       "128": "icon.png"
     }
-  },
-
-  "side_panel": {
-    "default_path": "index.html"
   },
   "background": {
     "service_worker": "src/background.ts",
@@ -60,5 +55,11 @@
     "https://openrouter.ai/*",
     "https://api.together.xyz/*",
     "http://localhost:11434/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["overlay.html"],
+      "matches": ["*://*.leetcode.com/*", "*://*.leetcode.cn/*"]
+    }
   ]
 }

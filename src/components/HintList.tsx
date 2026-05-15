@@ -8,9 +8,10 @@ interface HintListProps {
   isLoading: boolean;
   error: string | null;
   hasAnyKey: boolean;
+  onSuggestionClick?: (suggestion: string) => void;
 }
 
-export function HintList({ hints, isLoading, error, hasAnyKey }: HintListProps) {
+export function HintList({ hints, isLoading, error, hasAnyKey, onSuggestionClick }: HintListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when hints change or loading starts
@@ -42,7 +43,12 @@ export function HintList({ hints, isLoading, error, hasAnyKey }: HintListProps) 
   return (
     <div className="flex flex-col space-y-4 pb-6">
       {hints.map((hint, i) => (
-        <MessageBubble key={i} hint={hint} />
+        <MessageBubble 
+          key={i} 
+          hint={hint} 
+          isLast={i === hints.length - 1}
+          onSuggestionClick={onSuggestionClick}
+        />
       ))}
       
       {isLoading && (
