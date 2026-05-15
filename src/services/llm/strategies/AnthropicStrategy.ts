@@ -1,14 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { LLMProviderStrategy } from '../provider';
-import type { Hint, ProblemData, Settings } from '../../../types';
+import type { LLMProviderStrategy, LLMMessage } from '../provider';
+import type { Settings } from '../../../types';
 
 export class AnthropicStrategy implements LLMProviderStrategy {
   async *getHintStream(
     settings: Settings,
-    _problemData: ProblemData,
-    history: Hint[],
-    systemPrompt: string,
-    userPrompt: string
+    messages: LLMMessage[]
   ): AsyncGenerator<string> {
     const { model, anthropicKey } = settings;
     
@@ -18,12 +15,16 @@ export class AnthropicStrategy implements LLMProviderStrategy {
       fetch: (...args) => fetch(...args)
     });
 
-    const messages = this.prepareMessages(history, userPrompt);
+    const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
+    const filteredMessages = messages.filter(m => m.role !== 'system' && m.role !== 'developer');
 
     const stream = await client.messages.create({
       model,
       system: systemPrompt,
-      messages: messages as any,
+      messages: filteredMessages.map(m => ({ 
+        role: m.role as 'user' | 'assistant', 
+        content: m.content 
+      })),
       max_tokens: 1024,
       stream: true
     });
@@ -33,22 +34,5 @@ export class AnthropicStrategy implements LLMProviderStrategy {
         yield event.delta.text;
       }
     }
-  }
-
-  private prepareMessages(history: Hint[], userPrompt: string) {
-    const messages: { role: 'user' | 'assistant'; content: string }[] = [];
-
-    history.forEach((h, i) => {
-      if (h.content.trim()) {
-        messages.push({ 
-          role: "user", 
-          content: i === 0 ? "I'm working on a LeetCode problem. Help me." : "I'm still stuck on this, give me another nudge." 
-        });
-        messages.push({ role: h.role as 'assistant', content: h.content });
-      }
-    });
-
-    messages.push({ role: "user", content: userPrompt });
-    return messages;
   }
 }

@@ -1,14 +1,11 @@
 import OpenAI from 'openai';
-import type { LLMProviderStrategy } from '../provider';
-import type { Hint, ProblemData, Settings } from '../../../types';
+import type { LLMProviderStrategy, LLMMessage } from '../provider';
+import type { Settings } from '../../../types';
 
 export class OpenAIStrategy implements LLMProviderStrategy {
   async *getHintStream(
     settings: Settings,
-    _problemData: ProblemData,
-    history: Hint[],
-    systemPrompt: string,
-    userPrompt: string
+    messages: LLMMessage[]
   ): AsyncGenerator<string> {
     const { provider, model, ollamaUrl } = settings;
     
@@ -33,8 +30,6 @@ export class OpenAIStrategy implements LLMProviderStrategy {
       } : undefined
     });
 
-    const messages = this.prepareMessages(provider, model, history, systemPrompt, userPrompt);
-
     const stream = await client.chat.completions.create({
       model: model,
       messages: messages as any,
@@ -57,34 +52,5 @@ export class OpenAIStrategy implements LLMProviderStrategy {
       ollama: 'ollama'
     };
     return keys[settings.provider] || '';
-  }
-
-  private prepareMessages(
-    provider: string,
-    model: string,
-    history: Hint[],
-    systemPrompt: string,
-    userPrompt: string
-  ) {
-    const messages: { role: string; content: string }[] = [];
-    
-    const systemRole = (provider === 'openai' && (model.startsWith('o1') || model.startsWith('o3'))) 
-      ? "developer" 
-      : "system";
-
-    messages.push({ role: systemRole, content: systemPrompt });
-
-    history.forEach((h, i) => {
-      if (h.content.trim()) {
-        messages.push({ 
-          role: "user", 
-          content: i === 0 ? "I'm working on a LeetCode problem. Help me." : "I'm still stuck on this, give me another nudge." 
-        });
-        messages.push({ role: h.role, content: h.content });
-      }
-    });
-
-    messages.push({ role: "user", content: userPrompt });
-    return messages;
   }
 }

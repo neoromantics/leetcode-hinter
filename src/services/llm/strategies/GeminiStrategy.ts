@@ -1,49 +1,36 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { LLMProviderStrategy } from '../provider';
-import type { Hint, ProblemData, Settings } from '../../../types';
+import type { LLMProviderStrategy, LLMMessage } from '../provider';
+import type { Settings } from '../../../types';
 
 export class GeminiStrategy implements LLMProviderStrategy {
   async *getHintStream(
     settings: Settings,
-    _problemData: ProblemData,
-    history: Hint[],
-    systemPrompt: string,
-    userPrompt: string
+    messages: LLMMessage[]
   ): AsyncGenerator<string> {
     const { model, geminiKey } = settings;
     
     const genAI = new GoogleGenerativeAI(geminiKey);
     const modelInstance = genAI.getGenerativeModel({ model });
     
-    const historyItems = this.prepareHistory(history);
+    const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
+    const finalUserMessage = messages[messages.length - 1].content;
+    
+    const historyItems = messages.slice(0, messages.length - 1)
+      .filter(m => m.role !== 'system' && m.role !== 'developer')
+      .map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
 
-    const chat = modelInstance.startChat({ history: historyItems });
-    const result = await chat.sendMessageStream(`SYSTEM INSTRUCTION: ${systemPrompt}\n\nCONTEXT:\n${userPrompt}`);
+    if (historyItems.length > 0 && historyItems[0].role !== 'user') {
+      historyItems.unshift({ role: 'user', parts: [{ text: "Hello, I'm working on a LeetCode problem." }] });
+    }
+
+    const chat = modelInstance.startChat({ history: historyItems as any });
+    const result = await chat.sendMessageStream(`SYSTEM INSTRUCTION: ${systemPrompt}\n\nCONTEXT:\n${finalUserMessage}`);
     
     for await (const chunk of result.stream) {
       yield chunk.text();
     }
-  }
-
-  private prepareHistory(history: Hint[]) {
-    const historyItems = history
-      .filter(h => h.content.trim())
-      .flatMap((h, i) => [
-        {
-          role: 'user',
-          parts: [{ text: i === 0 ? "I'm working on a LeetCode problem. Help me." : "I'm still stuck on this, give me another nudge." }]
-        },
-        {
-          role: 'model',
-          parts: [{ text: h.content }]
-        }
-      ]);
-
-    if (historyItems.length === 0) {
-      // Gemini often prefers a starting user message if history is provided
-      return [];
-    }
-
-    return historyItems;
   }
 }

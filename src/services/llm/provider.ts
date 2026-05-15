@@ -1,4 +1,4 @@
-import type { Hint, ProblemData, Settings } from '../../types';
+import type { Settings } from '../../types';
 
 export interface LLMMessage {
   role: string;
@@ -8,9 +8,6 @@ export interface LLMMessage {
 export interface LLMProviderStrategy {
   getHintStream(
     settings: Settings,
-    problemData: ProblemData,
-    history: Hint[],
-    systemPrompt: string,
-    userPrompt: string
+    messages: LLMMessage[]
   ): AsyncGenerator<string>;
 }
