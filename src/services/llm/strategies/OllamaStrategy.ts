@@ -13,13 +13,13 @@ export class OllamaStrategy implements LLMProviderStrategy {
   ): AsyncGenerator<string> {
     const { provider, model, ollamaUrl, ollamaKey } = settings;
     
-    // 1. Determine the correct host
-    let host = 'http://localhost:11434'; // Default
+    // 1. Determine the correct host (Automated)
+    let host = 'http://localhost:11434';
     
     if (provider === 'ollama_cloud') {
       host = 'https://ollama.com';
-    } else {
-      // Local or custom: Strip trailing /v1, /api, or / to prevent double paths in the client
+    } else if (ollamaUrl && ollamaUrl !== 'http://localhost:11434/v1') {
+      // Allow custom local URL if explicitly changed, but strip trailing paths
       host = ollamaUrl.replace(/\/v1\/?$/, '').replace(/\/api\/?$/, '').replace(/\/$/, '');
     }
 

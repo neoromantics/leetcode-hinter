@@ -62,10 +62,10 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
             </label>
             
             <div className="space-y-4">
-              {/* URL Input (Always show for Ollama) */}
-              {isOllama && (
+              {/* URL Input (Optional for Local, Hidden for Cloud) */}
+              {settings.provider === 'ollama_local' && (
                 <div>
-                  <label className="block text-[9px] font-bold text-neutral-400 mb-1 uppercase">API URL</label>
+                  <label className="block text-[9px] font-bold text-neutral-400 mb-1 uppercase">Custom API URL (Optional)</label>
                   <input
                     type="text"
                     value={settings.ollamaUrl}
@@ -73,15 +73,15 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
                     placeholder="http://localhost:11434"
                     className="w-full px-4 py-2 border border-neutral-100 rounded-xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all text-sm font-mono bg-neutral-50"
                   />
+                  <p className="mt-1 text-[8px] text-neutral-400">Defaults to http://localhost:11434 if left blank.</p>
                 </div>
               )}
 
               {/* API Key Input */}
               <div>
                 <label className="block text-[9px] font-bold text-neutral-400 mb-1 uppercase">
-                  {settings.provider === 'ollama_cloud' ? 'API Key (Required)' : 
-                   settings.provider === 'ollama_local' ? 'API Key (Optional)' : 
-                   'API Key'}
+                  {settings.provider === 'ollama_cloud' ? 'Ollama API Key (Required)' : 
+                   'API Key (Optional)'}
                 </label>
                 <input
                   type="password"
@@ -95,8 +95,7 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
                     onUpdate({ [keyName]: val });
                   }}
                   placeholder={settings.provider === 'ollama_cloud' ? "Enter your cloud API key..." : 
-                               settings.provider === 'ollama_local' ? "Enter key if using a local proxy..." : 
-                               "Enter your API key..."}
+                               "Enter key if required..."}
                   className="w-full px-4 py-3 border border-neutral-100 rounded-xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all text-base font-mono bg-neutral-50 overflow-hidden text-ellipsis"
                 />
               </div>
@@ -104,9 +103,9 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
 
             <p className="mt-3 text-[11px] text-neutral-400 leading-relaxed italic">
               {settings.provider === 'ollama_local' 
-                ? 'Optimized for local instances running on your machine.' 
+                ? 'Using standard local endpoint. No configuration required.' 
                 : settings.provider === 'ollama_cloud'
-                ? 'Optimized for remote Ollama servers requiring authentication.'
+                ? 'Automatically connecting to the official Ollama Cloud API.'
                 : 'Stored locally and used only for direct API calls.'}
             </p>
           </div>
