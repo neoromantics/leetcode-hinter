@@ -1,22 +1,27 @@
 # LeetCode Hinter
 
-A Chrome extension that provides contextual, progressive hints for LeetCode problems to help you learn and prepare for interviews.
+A premium Chrome extension that provides contextual, progressive hints for LeetCode problems. Designed to help you learn algorithmic patterns and prepare for technical interviews without giving away the full solution immediately.
 
-## Features
-- **Elite Multi-Provider Support:** Choose between **OpenAI**, **Anthropic**, **DeepSeek**, and **Google Gemini**.
-- **Reasoning Models:** Access high-logic models like `o3-mini`, `o1-mini`, and `deepseek-reasoner` for complex algorithmic guidance.
-- **Top Coding Models:** Support for `claude-3-5-sonnet` (the gold standard for coding) and `gemini-2.0-flash-thinking`.
-- **Progressive Hinting:** Guided hints instead of immediate solutions.
-- **BYOK:** Use your own API keys for maximum privacy and low cost.
-- **Modern UI:** Clean, fast interface built with React and Tailwind CSS.
+## Key Features
+
+- **Floating Overlay UI:** A modern, collapsible drawer that hovers over your LeetCode tab. This eliminates side-by-side page splitting.
+- **Hover-to-Expand:** Move your mouse to the right edge to slide the panel open. Use the pin feature to keep it open while you code.
+- **Interactive Follow-ups:** AI automatically suggests 2-3 specific follow-up questions (e.g., "What is the time complexity?") that you can click to dive deeper.
+- **Real-time Streaming:** Hints appear word-by-word as they are generated for a snappy, responsive experience.
+- **Elite Multi-Provider Support:**
+  - **Cloud:** OpenAI (o3-mini, o1), Anthropic (Claude 3.5 Sonnet), Google Gemini 2.0, DeepSeek (R1).
+  - **Aggregators:** OpenRouter, Together AI for cost-effective access.
+  - **Local:** Full support for Ollama for 100% private and free hinting.
+- **Robust Data Extraction:** Multi-tiered scraping logic (Data Tags, Meta Tags, and Heuristics) ensuring it works across all LeetCode UI versions and study plans.
+- **Professional Formatting:** Full Markdown support with syntax highlighting for code snippets using the VS Code Dark theme.
 
 ## Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [OpenAI API Key](https://platform.openai.com/api-keys)
+- Node.js (v18+)
+- An API Key from your preferred provider (OpenAI, Anthropic, etc.) or a local Ollama instance.
 
-### Installation for Development
+### Installation
 1. Clone the repository.
 2. Install dependencies:
    ```bash
@@ -28,54 +33,37 @@ A Chrome extension that provides contextual, progressive hints for LeetCode prob
    ```
 
 ### Loading into Chrome
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Enable "Developer mode" (top right toggle).
-3. Click "Load unpacked".
-4. Select the `dist` folder in the project directory.
+1. Open Chrome and navigate to chrome://extensions/.
+2. Enable Developer mode (top right toggle).
+3. Click Load unpacked.
+4. Select the dist folder in the project directory.
 
 ## Usage
-1. Open any LeetCode problem (e.g., `leetcode.com/problems/two-sum/`).
-2. Click the LeetCode Hinter icon in your extensions menu (it's recommended to pin it).
-3. Go to Settings and enter your OpenAI API key.
-4. Go back to Hints and click "GET HINT" whenever you're stuck.
 
-## Architecture
-- **Frontend:** React 18, Tailwind CSS 4, Vite
-- **Extension Tooling:** CRXJS Vite Plugin
-- **Messaging:** Content script for DOM extraction, Background worker for lifecycle, Popup UI for interaction.
+1. Open any LeetCode problem (e.g., Two Sum).
+2. **Access the UI:**
+   - **Hover:** Move your mouse to the very right edge of the screen to see the orange handle.
+   - **Toggle:** Click the LeetCode Hinter icon in your extension toolbar.
+3. **Setup:** Go to Settings and enter your API key or configure your local Ollama URL.
+4. **Learn:** Click GET HINT whenever you are stuck. Use the suggestion chips at the bottom to explore further.
+5. **Pin:** Use the Pin icon in the header to lock the drawer open while you work.
 
-## Future Plans
-- Support for more LLM providers (Anthropic, Gemini).
-- Managed "Premium" backend for users without API keys.
-- History of hints per problem.
-- One-click solution analysis.
+## Affordable AI Options
 
-## Affordable Token Providers
-If you want to save money while using elite models, consider these providers:
-- **OpenRouter:** An aggregator that lets you pay-as-you-go for almost any model (Claude, GPT, DeepSeek). It often has **free models** available (like Gemini 2.0 Flash Thinking).
-- **Together AI:** Provides extremely fast and low-cost access to open-weights models like DeepSeek-R1 and Llama 3.
-- **DeepSeek API:** Directly using the DeepSeek API is currently one of the most cost-effective ways to get high-tier reasoning for coding.
-- **Google AI Studio:** Offers a very generous **free tier** for Gemini models, which is excellent for LeetCode hints.
+If you want to save money while using world-class models:
+- **OpenRouter:** Pay-as-you-go aggregator. Often has free models like Gemini 2.0 Flash Thinking.
+- **Google AI Studio:** Offers a generous free tier for Gemini models.
+- **DeepSeek API:** Currently the most cost-effective provider for high-tier reasoning (DeepSeek-R1).
+- **Ollama:** Completely free and private. Run models like deepseek-coder-v2 or gemma3 locally.
 
-## Using Local Ollama
-For complete privacy and zero cost, you can use LeetCode Hinter with a local [Ollama](https://ollama.com/) instance:
+### Using Local Ollama
+1. **Download a Model:** `ollama pull deepseek-coder-v2`
+2. **Start Ollama:** Ensure the server is running.
+   - Note: If you see a 403 error, run: `OLLAMA_ORIGINS="*" ollama serve`
+3. **Configure:** Set Provider to Ollama, Model to your pulled name, and URL to http://localhost:11434/v1.
 
-1.  **Install Ollama:** Download and install from [ollama.com](https://ollama.com/).
-2.  **Download a Model:** Open your terminal and pull a coding-optimized model:
-    ```bash
-    ollama pull deepseek-coder-v2
-    ```
-    *Alternatively, use `llama3.3` or `qwen2.5-coder`.*
-3.  **Start Ollama:** Ensure the Ollama server is running (it usually starts automatically).
-    *   **Crucial Note:** If you see a **403 error**, you must allow the extension origin in Ollama. Set the environment variable:
-        ```bash
-        # macOS/Linux
-        OLLAMA_ORIGINS="*" ollama serve
-        ```
-        *(Or set `OLLAMA_ORIGINS` to `chrome-extension://*` in your system environment variables and restart Ollama).*
-4.  **Configure Extension:**
-    *   Open LeetCode Hinter **Settings**.
-    *   Select **Ollama** as the Provider.
-    *   Ensure the **Model** name matches the one you pulled (e.g., `deepseek-coder-v2`).
-    *   Verify the **API URL** is set to `http://localhost:11434/v1`.
-5.  **Get Hints:** You can now get hints without an internet connection (to the AI provider) and for free!
+## Tech Stack
+- **Frontend:** React 18, Tailwind CSS 4, Lucide Icons.
+- **Build:** Vite + CRXJS Vite Plugin.
+- **AI Integration:** Official SDKs for OpenAI, Anthropic, and Google Generative AI.
+- **Network:** Background Proxy architecture to bypass CORS and 403 blocks.
