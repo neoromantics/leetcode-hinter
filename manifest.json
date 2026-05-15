@@ -54,7 +54,8 @@
     "https://api.deepseek.com/*",
     "https://openrouter.ai/*",
     "https://api.together.xyz/*",
-    "http://localhost:11434/*"
+    "http://localhost:11434/*",
+    "https://ollama.com/*"
   ],
   "web_accessible_resources": [
     {

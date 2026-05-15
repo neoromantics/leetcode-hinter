@@ -10,6 +10,8 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: SettingsPanelProps) {
+  const isOllama = settings.provider.startsWith('ollama');
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-full">
       <section>
@@ -24,13 +26,18 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
                 <button
                   key={p}
                   onClick={() => onUpdate({ provider: p, model: MODELS[p][0] })}
-                  className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-tight transition-all border ${
+                  className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all border ${
                     settings.provider === p 
                       ? 'bg-neutral-900 text-white shadow-md border-neutral-900' 
                       : 'bg-white text-neutral-400 hover:bg-neutral-50 border-neutral-100'
                   }`}
                 >
-                  {p === 'openrouter' ? 'OpenRouter' : p === 'together' ? 'Together AI' : p === 'openai' ? 'OpenAI' : p}
+                  {p === 'openrouter' ? 'OpenRouter' : 
+                   p === 'together' ? 'Together AI' : 
+                   p === 'openai' ? 'OpenAI' : 
+                   p === 'ollama_local' ? 'Ollama Local' :
+                   p === 'ollama_cloud' ? 'Ollama Cloud' :
+                   p}
                 </button>
               ))}
             </div>
@@ -43,7 +50,7 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
               onChange={(e) => onUpdate({ model: e.target.value })}
               className="w-full px-4 py-3 border border-neutral-100 rounded-xl bg-neutral-50 text-base font-medium focus:ring-2 focus:ring-brand outline-none truncate transition-all appearance-none cursor-pointer"
             >
-              {MODELS[settings.provider].map((m) => (
+              {(MODELS[settings.provider] || []).map((m) => (
                 <option key={m} value={m}>{m}</option>
               ))}
             </select>
@@ -51,18 +58,55 @@ export function SettingsPanel({ settings, onUpdate, onSave, isSaving }: Settings
 
           <div className="p-5 bg-white border border-neutral-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
             <label className="block text-[11px] font-black text-neutral-400 mb-3 uppercase tracking-widest">
-              {settings.provider === 'ollama' ? 'Ollama API URL' : `${settings.provider.charAt(0).toUpperCase() + settings.provider.slice(1)} API Key`}
+              {isOllama ? 'Ollama Configuration' : `${settings.provider.charAt(0).toUpperCase() + settings.provider.slice(1)} API Key`}
             </label>
-            <input
-              type={settings.provider === 'ollama' ? "text" : "password"}
-              value={(settings as any)[`${settings.provider}Key`] || (settings.provider === 'ollama' ? settings.ollamaUrl : '')}
-              onChange={(e) => onUpdate({ [settings.provider === 'ollama' ? 'ollamaUrl' : `${settings.provider}Key`]: e.target.value })}
-              placeholder={settings.provider === 'ollama' ? "http://localhost:11434/v1" : "Enter key..."}
-              className="w-full px-4 py-3 border border-neutral-100 rounded-xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all text-base font-mono bg-neutral-50 overflow-hidden text-ellipsis"
-            />
+            
+            <div className="space-y-4">
+              {/* URL Input (Always show for Ollama) */}
+              {isOllama && (
+                <div>
+                  <label className="block text-[9px] font-bold text-neutral-400 mb-1 uppercase">API URL</label>
+                  <input
+                    type="text"
+                    value={settings.ollamaUrl}
+                    onChange={(e) => onUpdate({ ollamaUrl: e.target.value })}
+                    placeholder="http://localhost:11434"
+                    className="w-full px-4 py-2 border border-neutral-100 rounded-xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all text-sm font-mono bg-neutral-50"
+                  />
+                </div>
+              )}
+
+              {/* API Key Input */}
+              <div>
+                <label className="block text-[9px] font-bold text-neutral-400 mb-1 uppercase">
+                  {settings.provider === 'ollama_cloud' ? 'API Key (Required)' : 
+                   settings.provider === 'ollama_local' ? 'API Key (Optional)' : 
+                   'API Key'}
+                </label>
+                <input
+                  type="password"
+                  value={
+                    isOllama ? settings.ollamaKey :
+                    (settings as any)[`${settings.provider}Key`] || ''
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const keyName = isOllama ? 'ollamaKey' : `${settings.provider}Key`;
+                    onUpdate({ [keyName]: val });
+                  }}
+                  placeholder={settings.provider === 'ollama_cloud' ? "Enter your cloud API key..." : 
+                               settings.provider === 'ollama_local' ? "Enter key if using a local proxy..." : 
+                               "Enter your API key..."}
+                  className="w-full px-4 py-3 border border-neutral-100 rounded-xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all text-base font-mono bg-neutral-50 overflow-hidden text-ellipsis"
+                />
+              </div>
+            </div>
+
             <p className="mt-3 text-[11px] text-neutral-400 leading-relaxed italic">
-              {settings.provider === 'ollama' 
-                ? 'Local endpoint for your Ollama instance.' 
+              {settings.provider === 'ollama_local' 
+                ? 'Optimized for local instances running on your machine.' 
+                : settings.provider === 'ollama_cloud'
+                ? 'Optimized for remote Ollama servers requiring authentication.'
                 : 'Stored locally and used only for direct API calls.'}
             </p>
           </div>

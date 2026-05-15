@@ -1,5 +1,7 @@
 import type { Provider } from './types';
 
+const OLLAMA_MODELS = ['deepseek-v3.1:671b-cloud', 'qwen3-coder:480b-cloud', 'qwen3-coder:30b', 'gpt-oss:20b-cloud', 'gpt-oss:120b-cloud', 'gemma3:12b', 'gemma3:4b', 'deepseek-coder-v2', 'llama3.3', 'mistral', 'codellama'];
+
 export const MODELS: Record<Provider, string[]> = {
   openai: ['o3-mini', 'o1-mini', 'gpt-4o'],
   anthropic: ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
@@ -7,5 +9,6 @@ export const MODELS: Record<Provider, string[]> = {
   deepseek: ['deepseek-reasoner', 'deepseek-chat'],
   openrouter: ['google/gemini-2.0-flash-thinking-exp:free', 'deepseek/deepseek-r1', 'anthropic/claude-3.5-sonnet'],
   together: ['deepseek-ai/DeepSeek-R1', 'meta-llama/Llama-3.3-70B-Instruct-Turbo', 'Qwen/Qwen2.5-Coder-32B-Instruct'],
-  ollama: ['deepseek-v3.1:671b-cloud', 'qwen3-coder:480b-cloud', 'qwen3-coder:30b', 'gpt-oss:20b-cloud', 'gpt-oss:120b-cloud', 'gemma3:12b', 'gemma3:4b', 'deepseek-coder-v2', 'llama3.3', 'mistral', 'codellama']
+  ollama_local: OLLAMA_MODELS,
+  ollama_cloud: OLLAMA_MODELS
 };

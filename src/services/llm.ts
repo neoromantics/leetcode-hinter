@@ -3,6 +3,7 @@ import type { LLMProviderStrategy, LLMMessage } from './llm/provider';
 import { OpenAIStrategy } from './llm/strategies/OpenAIStrategy';
 import { AnthropicStrategy } from './llm/strategies/AnthropicStrategy';
 import { GeminiStrategy } from './llm/strategies/GeminiStrategy';
+import { OllamaStrategy } from './llm/strategies/OllamaStrategy';
 
 /**
  * LLMService acts as the Transport Layer.
@@ -16,7 +17,8 @@ export class LLMService {
     const { provider } = settings;
     const apiKey = this.getApiKey(settings);
 
-    if (!apiKey && provider !== 'ollama') {
+    // Ollama is allowed to have an empty key
+    if (!apiKey && provider !== 'ollama_local' && provider !== 'ollama_cloud') {
       throw new Error(`Please set your ${provider} API key in settings.`);
     }
 
@@ -35,8 +37,10 @@ export class LLMService {
       case 'deepseek':
       case 'openrouter':
       case 'together':
-      case 'ollama':
         return new OpenAIStrategy();
+      case 'ollama_local':
+      case 'ollama_cloud':
+        return new OllamaStrategy();
       case 'anthropic':
         return new AnthropicStrategy();
       case 'gemini':
@@ -54,7 +58,8 @@ export class LLMService {
       deepseek: settings.deepseekKey,
       openrouter: settings.openrouterKey,
       together: settings.togetherKey,
-      ollama: 'ollama'
+      ollama_local: 'ollama', // Local doesn't need a key
+      ollama_cloud: settings.ollamaKey // Cloud requires a key
     };
     return keys[settings.provider] || '';
   }

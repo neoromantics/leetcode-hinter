@@ -55,7 +55,22 @@
       ]
     },
     "condition": {
-      "urlFilter": "|http://localhost:11434/*",
+      "urlFilter": "||localhost:11434/*",
+      "resourceTypes": ["xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "origin", "operation": "remove" },
+        { "header": "referer", "operation": "remove" }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||ollama.com/*",
       "resourceTypes": ["xmlhttprequest"]
     }
   }

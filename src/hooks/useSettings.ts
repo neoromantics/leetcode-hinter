@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Settings } from '../types';
+import type { Settings, Provider } from '../types';
 
 const DEFAULT_SETTINGS: Settings = {
   openaiKey: '',
@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS: Settings = {
   openrouterKey: '',
   togetherKey: '',
   ollamaUrl: 'http://localhost:11434/v1',
+  ollamaKey: '',
   provider: 'openai',
   model: 'o3-mini'
 };
@@ -19,7 +20,19 @@ export function useSettings() {
 
   useEffect(() => {
     chrome.storage.local.get(Object.keys(DEFAULT_SETTINGS), (result) => {
-      setSettings(prev => ({ ...prev, ...result }));
+      let migratedProvider = result.provider as Provider;
+      
+      // Migration: Handle legacy 'ollama' provider name
+      if ((result.provider as string) === 'ollama') {
+        migratedProvider = 'ollama_local';
+        chrome.storage.local.set({ provider: 'ollama_local' });
+      }
+
+      setSettings(prev => ({ 
+        ...prev, 
+        ...result, 
+        provider: migratedProvider || prev.provider 
+      }));
       setIsLoaded(true);
     });
   }, []);

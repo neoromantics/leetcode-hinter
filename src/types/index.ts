@@ -1,4 +1,4 @@
-export type Provider = 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'openrouter' | 'together' | 'ollama';
+export type Provider = 'openai' | 'anthropic' | 'gemini' | 'deepseek' | 'openrouter' | 'together' | 'ollama_local' | 'ollama_cloud';
 
 export interface Hint {
   role: 'user' | 'assistant';
@@ -20,6 +20,7 @@ export interface Settings {
   openrouterKey: string;
   togetherKey: string;
   ollamaUrl: string;
+  ollamaKey: string;
   provider: Provider;
   model: string;
 }

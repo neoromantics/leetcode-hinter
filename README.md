@@ -11,7 +11,7 @@ A premium Chrome extension that provides contextual, progressive hints for LeetC
 - **Elite Multi-Provider Support:**
   - **Cloud:** OpenAI (o3-mini, o1), Anthropic (Claude 3.5 Sonnet), Google Gemini 2.0, DeepSeek (R1).
   - **Aggregators:** OpenRouter, Together AI for cost-effective access.
-  - **Local:** Full support for Ollama for 100% private and free hinting.
+  - **Ollama:** Choose between **Ollama Local** (zero-config, private) and **Ollama Cloud** (official managed API).
 - **Robust Data Extraction:** Multi-tiered scraping logic (Data Tags, Meta Tags, and Heuristics) ensuring it works across all LeetCode UI versions and study plans.
 - **Professional Formatting:** Full Markdown support with syntax highlighting for code snippets using the VS Code Dark theme.
 
@@ -19,7 +19,7 @@ A premium Chrome extension that provides contextual, progressive hints for LeetC
 
 ### Prerequisites
 - Node.js (v18+)
-- An API Key from your preferred provider (OpenAI, Anthropic, etc.) or a local Ollama instance.
+- An API Key from your preferred provider (OpenAI, Anthropic, etc.) or an [Ollama](https://ollama.com) account.
 
 ### Installation
 1. Clone the repository.
@@ -44,26 +44,31 @@ A premium Chrome extension that provides contextual, progressive hints for LeetC
 2. **Access the UI:**
    - **Hover:** Move your mouse to the very right edge of the screen to see the orange handle.
    - **Toggle:** Click the LeetCode Hinter icon in your extension toolbar.
-3. **Setup:** Go to Settings and enter your API key or configure your local Ollama URL.
+3. **Setup:** Go to Settings and configure your AI provider.
 4. **Learn:** Click GET HINT whenever you are stuck. Use the suggestion chips at the bottom to explore further.
 5. **Pin:** Use the Pin icon in the header to lock the drawer open while you work.
 
-## Affordable AI Options
+## AI Provider Configuration
 
-If you want to save money while using world-class models:
-- **OpenRouter:** Pay-as-you-go aggregator. Often has free models like Gemini 2.0 Flash Thinking.
-- **Google AI Studio:** Offers a generous free tier for Gemini models.
-- **DeepSeek API:** Currently the most cost-effective provider for high-tier reasoning (DeepSeek-R1).
-- **Ollama:** Completely free and private. Run models like deepseek-coder-v2 or gemma3 locally.
+### Cloud Providers
+Enter your API Key for OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or Together AI. Keys are stored locally and only sent to the respective provider.
 
-### Using Local Ollama
-1. **Download a Model:** `ollama pull deepseek-coder-v2`
+### Using Ollama
+
+#### Ollama Local
+For complete privacy and zero cost using models running on your own hardware:
+1. **Download a Model:** `ollama pull deepseek-coder-v2` (or `gemma3`, `llama3.3`).
 2. **Start Ollama:** Ensure the server is running.
    - Note: If you see a 403 error, run: `OLLAMA_ORIGINS="*" ollama serve`
-3. **Configure:** Set Provider to Ollama, Model to your pulled name, and URL to http://localhost:11434/v1.
+3. **Configure:** Set Provider to **Ollama Local**, Model to your pulled name, and URL to http://localhost:11434.
+
+#### Ollama Cloud
+For offloading heavy models to Ollama's managed infrastructure:
+1. **Get API Key:** Sign in to [ollama.com](https://ollama.com) and create an API Key in your Settings.
+2. **Configure:** Set Provider to **Ollama Cloud** and enter your **Ollama API Key**. The extension will automatically connect to the official cloud endpoint.
 
 ## Tech Stack
 - **Frontend:** React 18, Tailwind CSS 4, Lucide Icons.
 - **Build:** Vite + CRXJS Vite Plugin.
-- **AI Integration:** Official SDKs for OpenAI, Anthropic, and Google Generative AI.
+- **AI Integration:** Official SDKs for OpenAI, Anthropic, Google Generative AI, and Ollama.
 - **Network:** Background Proxy architecture to bypass CORS and 403 blocks.

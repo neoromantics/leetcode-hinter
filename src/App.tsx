@@ -34,7 +34,7 @@ function App() {
 
   const hasAnyKey = Object.entries(settings).some(([key, val]) => 
     key.endsWith('Key') && val !== ''
-  ) || (settings.provider === 'ollama');
+  ) || (settings.provider === 'ollama_local') || (settings.provider === 'ollama_cloud' && settings.ollamaKey !== '');
 
   if (!isLoaded) return null;
 
