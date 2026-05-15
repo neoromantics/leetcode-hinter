@@ -89,7 +89,7 @@ export function MessageBubble({ hint, onSuggestionClick, isLast }: MessageBubble
             <button
               key={i}
               onClick={() => onSuggestionClick?.(s)}
-              className="px-3 py-1.5 bg-white border border-neutral-200 text-neutral-600 rounded-full text-xs font-semibold hover:border-brand hover:text-brand hover:bg-orange-50 transition-all shadow-sm active:scale-95 text-left"
+              className="px-4 py-2.5 bg-white border border-neutral-200 text-neutral-600 rounded-2xl text-sm font-semibold hover:border-brand hover:text-brand hover:bg-orange-50 transition-all shadow-sm active:scale-95 text-left"
             >
               {s}
             </button>

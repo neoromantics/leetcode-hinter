@@ -7,5 +7,5 @@ export const MODELS: Record<Provider, string[]> = {
   deepseek: ['deepseek-reasoner', 'deepseek-chat'],
   openrouter: ['google/gemini-2.0-flash-thinking-exp:free', 'deepseek/deepseek-r1', 'anthropic/claude-3.5-sonnet'],
   together: ['deepseek-ai/DeepSeek-R1', 'meta-llama/Llama-3.3-70B-Instruct-Turbo', 'Qwen/Qwen2.5-Coder-32B-Instruct'],
-  ollama: ['qwen3-coder:30b', 'gpt-oss:20b-cloud', 'gpt-oss:120b-cloud', 'gemma3:12b', 'gemma3:4b', 'deepseek-coder-v2', 'llama3.3', 'mistral', 'codellama']
+  ollama: ['deepseek-v3.1:671b-cloud', 'qwen3-coder:480b-cloud', 'qwen3-coder:30b', 'gpt-oss:20b-cloud', 'gpt-oss:120b-cloud', 'gemma3:12b', 'gemma3:4b', 'deepseek-coder-v2', 'llama3.3', 'mistral', 'codellama']
 };
