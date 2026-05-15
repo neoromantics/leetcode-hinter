@@ -12,23 +12,28 @@ export class LeetCodeHintAgent implements IAgent {
   readonly name = 'LeetCodeHintAgent';
 
   async *process(settings: Settings, problem: ProblemData, history: Hint[]): AsyncGenerator<string> {
-    // 1. Build the thought process (messages)
     const messages = this.assembleWorldState(settings, problem, history);
     
-    console.log(`[${this.name}] Processing request via transport layer`);
+    console.log(`[${this.name}] Requesting stream for ${settings.provider} with ${messages.length} messages`);
     
-    // 2. Execute via Transport Layer
-    return LLMService.getHintStream(settings, messages);
+    try {
+      const stream = LLMService.getHintStream(settings, messages);
+      for await (const chunk of stream) {
+        yield chunk;
+      }
+    } catch (error: any) {
+      console.error(`[${this.name}] Error during processing:`, error);
+      throw error;
+    }
   }
 
   /**
-   * Assembles the "World State" into a format the LLM can understand.
-   * This is where Context Providers would be used in a more complex setup.
+   * Assembles the "World State" ensuring alternating roles for LLM providers.
    */
   private assembleWorldState(settings: Settings, problem: ProblemData, history: Hint[]): AgentMessage[] {
     const messages: AgentMessage[] = [];
     
-    // Identify Personality
+    // 1. System Identity
     const systemRole = (settings.provider === 'openai' && (settings.model.startsWith('o1') || settings.model.startsWith('o3'))) 
       ? "developer" 
       : "system";
@@ -38,29 +43,54 @@ export class LeetCodeHintAgent implements IAgent {
       content: PROMPTS.HINT_COACH_SYSTEM 
     });
 
-    // Reconstruct Memory
-    history.forEach((h, i) => {
-      if (h.content.trim()) {
-        messages.push({ 
-          role: "user", 
-          content: i === 0 ? "I'm working on a LeetCode problem. Help me." : "I'm still stuck on this, give me another nudge." 
-        });
-        messages.push({ 
-          role: h.role as 'assistant' | 'user', 
-          content: h.content 
-        });
-      }
-    });
-
-    // Attach Current Perception
-    const perception = PROMPTS.PROBLEM_CONTEXT_TEMPLATE(
+    // 2. Map History and Current Context into alternating turns
+    // The pattern is: [User Context + Feedback] -> Assistant Hint -> [User Feedback] -> Assistant Hint
+    
+    const problemContext = PROMPTS.PROBLEM_CONTEXT_TEMPLATE(
       problem.title,
       problem.description,
       problem.language,
       problem.code
     );
 
-    messages.push({ role: "user", content: perception });
+    if (history.length === 0) {
+      // First hint: Just send the context
+      messages.push({ role: "user", content: problemContext });
+    } else {
+      // Subsequent hints: We need to interleave history correctly
+      history.forEach((h, i) => {
+        if (!h.content.trim()) return;
+
+        if (h.role === 'user') {
+          // If the history item is a user follow-up question
+          messages.push({ role: 'user', content: h.content });
+        } else {
+          // If the history item is an assistant hint, we need a preceding user message
+          // Ensure we don't double up on 'user' messages
+          const lastMsg = messages[messages.length - 1];
+          if (lastMsg && lastMsg.role !== 'user') {
+             messages.push({ 
+               role: 'user', 
+               content: i === 0 ? "I'm working on a LeetCode problem. Help me." : "I'm still stuck, give me another nudge." 
+             });
+          }
+          messages.push({ role: 'assistant', content: h.content });
+        }
+      });
+
+      // Finally, add the current context as a user message, but only if the last message was assistant
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg && lastMsg.role === 'assistant') {
+        messages.push({ 
+          role: "user", 
+          content: `Here is my updated context/progress:\n${problemContext}` 
+        });
+      } else if (lastMsg && lastMsg.role === 'user') {
+        // If the last message was a user follow-up, append the context to it or replace it?
+        // Better to append to keep the flow natural.
+        lastMsg.content = `${lastMsg.content}\n\nContext:\n${problemContext}`;
+      }
+    }
 
     return messages;
   }

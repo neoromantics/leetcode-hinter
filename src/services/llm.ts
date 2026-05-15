@@ -13,7 +13,14 @@ export class LLMService {
     settings: Settings,
     messages: LLMMessage[]
   ): AsyncGenerator<string> {
-    const strategy = this.getStrategy(settings.provider);
+    const { provider } = settings;
+    const apiKey = this.getApiKey(settings);
+
+    if (!apiKey && provider !== 'ollama') {
+      throw new Error(`Please set your ${provider} API key in settings.`);
+    }
+
+    const strategy = this.getStrategy(provider);
     
     const stream = strategy.getHintStream(settings, messages);
 
@@ -37,5 +44,18 @@ export class LLMService {
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
+  }
+
+  private static getApiKey(settings: Settings): string {
+    const keys: Record<string, string> = {
+      openai: settings.openaiKey,
+      anthropic: settings.anthropicKey,
+      gemini: settings.geminiKey,
+      deepseek: settings.deepseekKey,
+      openrouter: settings.openrouterKey,
+      together: settings.togetherKey,
+      ollama: 'ollama'
+    };
+    return keys[settings.provider] || '';
   }
 }
